@@ -9,11 +9,11 @@ class Book(models.Model):
         verbose_name = "Книга"
         verbose_name_plural = "Книги"
 
-    def __str__(self):
-        pass
+    # def __str__(self):
+    #     pass
 
-    def save(self):
-        pass
+    # def save(self):
+    #     pass
 
-    def get_absolute_url(self):
-        pass
+    # def get_absolute_url(self):
+    #     pass
