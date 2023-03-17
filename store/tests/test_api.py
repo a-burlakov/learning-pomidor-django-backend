@@ -15,7 +15,7 @@ class BooksTestCase(APITestCase):
             name="Test Book 2 from Author 2", price=55, author_name="Author 1"
         )
         self.book_3 = Book.objects.create(
-            name="Test Book 3", price=55, author_name="Author 2"
+            name="Test Book 3", price=60, author_name="Author 2"
         )
 
     def test_get(self):
@@ -37,5 +37,48 @@ class BooksTestCase(APITestCase):
 
         # Getting data from serializer.
         serializer_data = BooksSerializer([self.book_2, self.book_3], many=True).data
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        self.assertEqual(serializer_data, response.data)
+
+    def test_get_order_1(self):
+        url = reverse("book-list")
+        response = self.client.get(url, data={"ordering": "author_name"})
+
+        serializer_data = BooksSerializer(
+            [self.book_1, self.book_2, self.book_3], many=True
+        ).data
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        self.assertEqual(serializer_data, response.data)
+
+    def test_get_order_2(self):
+        url = reverse("book-list")
+        response = self.client.get(url, data={"ordering": "-author_name"})
+
+        serializer_data_1 = BooksSerializer(
+            [self.book_3, self.book_2, self.book_1], many=True
+        ).data
+        serializer_data_2 = BooksSerializer(
+            [self.book_3, self.book_1, self.book_2], many=True
+        ).data
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        self.assertIn(response.data, [serializer_data_1, serializer_data_2])
+
+    def test_get_order_3(self):
+        url = reverse("book-list")
+        response = self.client.get(url, data={"ordering": "price"})
+
+        serializer_data = BooksSerializer(
+            [self.book_1, self.book_2, self.book_3], many=True
+        ).data
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        self.assertEqual(serializer_data, response.data)
+
+    def test_get_order_4(self):
+        url = reverse("book-list")
+        response = self.client.get(url, data={"ordering": "-price"})
+
+        serializer_data = BooksSerializer(
+            [self.book_3, self.book_2, self.book_1], many=True
+        ).data
         self.assertEqual(status.HTTP_200_OK, response.status_code)
         self.assertEqual(serializer_data, response.data)
