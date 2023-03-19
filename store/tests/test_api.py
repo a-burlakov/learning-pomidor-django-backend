@@ -34,6 +34,16 @@ class BooksTestCase(APITestCase):
         self.assertEqual(status.HTTP_200_OK, response.status_code)
         self.assertEqual(serializer_data, response.data)
 
+    def test_get_detail(self):
+        # Request to server via router name from "url.py".
+        url = reverse("book-detail", args=(self.book_1.id,))
+        response = self.client.get(url)
+
+        # Getting data from serializer.
+        serializer_data = BooksSerializer(self.book_1).data
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        self.assertEqual(serializer_data, response.data)
+
     def test_get_search(self):
         # Request to server via router name from "url.py".
         url = reverse("book-list")
