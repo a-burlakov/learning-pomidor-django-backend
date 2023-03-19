@@ -1,3 +1,6 @@
+import json
+
+from django.contrib.auth.models import User
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -17,6 +20,7 @@ class BooksTestCase(APITestCase):
         self.book_3 = Book.objects.create(
             name="Test Book 3", price=60, author_name="Author 2"
         )
+        self.user = User.objects.create(username="testusername")
 
     def test_get(self):
         # Request to server via router name from "url.py".
@@ -82,3 +86,40 @@ class BooksTestCase(APITestCase):
         ).data
         self.assertEqual(status.HTTP_200_OK, response.status_code)
         self.assertEqual(serializer_data, response.data)
+
+    def test_create(self):
+        self.assertEqual(Book.objects.all().count(), 3)
+        url = reverse("book-list")
+        data = {
+            "name": "Programming in Python 3",
+            "price": 150,
+            "author_name": "Mark Summerfield",
+        }
+        json_data = json.dumps(data)
+        self.client.force_login(self.user)
+
+        response = self.client.post(
+            url, data=json_data, content_type="application/json"
+        )
+
+        self.assertEqual(status.HTTP_201_CREATED, response.status_code)
+        self.assertEqual(Book.objects.all().count(), 4)
+
+    def test_update(self):
+        self.assertEqual(Book.objects.all().count(), 3)
+        url = reverse("book-detail", args=(self.book_1.id,))
+        data = {
+            "name": self.book_1.name,
+            "price": 777,
+            "author_name": self.book_1.author_name,
+        }
+        json_data = json.dumps(data)
+        self.client.force_login(self.user)
+
+        response = self.client.put(url, data=json_data, content_type="application/json")
+
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        self.assertEqual(Book.objects.all().count(), 3)
+
+        self.book_1.refresh_from_db()
+        self.assertEqual(777, self.book_1.price)
