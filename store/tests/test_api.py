@@ -123,3 +123,14 @@ class BooksTestCase(APITestCase):
 
         self.book_1.refresh_from_db()
         self.assertEqual(777, self.book_1.price)
+
+    def test_delete(self):
+        self.assertEqual(Book.objects.all().count(), 3)
+        url = reverse("book-detail", args=(self.book_1.id,))
+
+        self.client.force_login(self.user)
+
+        response = self.client.delete(url)
+
+        self.assertEqual(status.HTTP_204_NO_CONTENT, response.status_code)
+        self.assertEqual(Book.objects.all().count(), 2)
