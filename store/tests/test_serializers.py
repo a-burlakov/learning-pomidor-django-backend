@@ -19,12 +19,14 @@ class BooSerializerTestCase(TestCase):
                 "name": "Test Book 1",
                 "price": "25.00",
                 "author_name": "Test Author",
+                "owner": None,
             },
             {
                 "id": book_2.id,
                 "name": "Test Book 2",
                 "price": "52.00",
                 "author_name": "Test Author",
+                "owner": None,
             },
         ]
         self.assertEqual(expected_data, data)
