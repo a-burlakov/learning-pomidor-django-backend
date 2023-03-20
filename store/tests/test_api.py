@@ -114,6 +114,7 @@ class BooksTestCase(APITestCase):
 
         self.assertEqual(status.HTTP_201_CREATED, response.status_code)
         self.assertEqual(Book.objects.all().count(), 4)
+        self.assertEqual(Book.objects.last().owner, self.user)
 
     def test_update(self):
         self.assertEqual(Book.objects.all().count(), 3)
