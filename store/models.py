@@ -48,7 +48,7 @@ class UserBookRelation(models.Model):
     )
     like = models.BooleanField("Лайк", default=False)
     in_bookmarks = models.BooleanField("В закладках", default=False)
-    rate = models.PositiveSmallIntegerField("Оценка", choices=RATE_CHOICES)
+    rate = models.PositiveSmallIntegerField("Оценка", choices=RATE_CHOICES, null=True)
 
     class Meta:
         verbose_name = "Отношение книги и пользователя"

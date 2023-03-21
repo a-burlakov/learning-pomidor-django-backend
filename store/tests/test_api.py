@@ -6,7 +6,7 @@ from rest_framework import status
 from rest_framework.exceptions import ErrorDetail
 from rest_framework.test import APITestCase
 
-from store.models import Book
+from store.models import Book, UserBookRelation
 from store.serializers import BooksSerializer
 
 
@@ -195,3 +195,35 @@ class BooksTestCase(APITestCase):
 
         self.assertEqual(status.HTTP_204_NO_CONTENT, response.status_code)
         self.assertEqual(Book.objects.all().count(), 2)
+
+
+class BooksRelationTestCase(APITestCase):
+    def setUp(self):
+        self.user = User.objects.create(username="testusername")
+        self.user2 = User.objects.create(username="testusername2")
+        self.book_1 = Book.objects.create(
+            name="Test Book 1", price=25, author_name="Author 1", owner=self.user
+        )
+        self.book_2 = Book.objects.create(
+            name="Test Book 2 from Author 2",
+            price=55,
+            author_name="Author 1",
+            owner=self.user,
+        )
+
+    def test_like(self):
+        url = reverse(
+            "userbookrelation-detail",
+            args=(self.book_1.id,),
+        )
+
+        data = {"like": True, "rate": 5}
+        json_data = json.dumps(data)
+        self.client.force_login(self.user)
+        response = self.client.patch(
+            url, content_type="application/json", data=json_data
+        )
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        relation = UserBookRelation.objects.get(user=self.user, book_id=self.book_1.id)
+        self.assertTrue(relation.like)
+        self.assertEqual(relation.rate, 5)
