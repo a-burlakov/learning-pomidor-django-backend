@@ -7,7 +7,14 @@ class Book(models.Model):
     price = models.DecimalField("Цена", max_digits=10, decimal_places=2)
     author_name = models.CharField("Автор", max_length=255)
     owner = models.ForeignKey(
-        User, verbose_name="Владелец", on_delete=models.SET_NULL, null=True
+        User,
+        verbose_name="Владелец",
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="my_books",
+    )
+    readers = models.ManyToManyField(
+        User, through="UserBookRelation", related_name="books"
     )
 
     class Meta:
