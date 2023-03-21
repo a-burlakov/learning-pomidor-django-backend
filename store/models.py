@@ -22,3 +22,30 @@ class Book(models.Model):
 
     # def get_absolute_url(self):
     #     pass
+
+
+class UserBookRelation(models.Model):
+    RATE_CHOICES = (
+        (1, "Ok"),
+        (2, "Fine"),
+        (3, "Good"),
+        (4, "Amazing"),
+        (5, "Incredible"),
+    )
+
+    user = models.ForeignKey(
+        User, verbose_name="Пользователь", on_delete=models.CASCADE, null=True
+    )
+    book = models.ForeignKey(
+        Book, verbose_name="Книга", on_delete=models.CASCADE, null=True
+    )
+    like = models.BooleanField("Лайк", default=False)
+    in_bookmarks = models.BooleanField("В закладках", default=False)
+    rate = models.PositiveSmallIntegerField("Оценка", choices=RATE_CHOICES)
+
+    class Meta:
+        verbose_name = "Отношение книги и пользователя"
+        verbose_name_plural = "Отношения книг и пользователей"
+
+    def __str__(self):
+        return f"{self.user.username}: {self.book.name}, ({self.rate})"
