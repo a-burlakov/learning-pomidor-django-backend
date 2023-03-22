@@ -1,6 +1,7 @@
 import json
 
 from django.contrib.auth.models import User
+from django.db.models import Count, When, Case
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.exceptions import ErrorDetail
@@ -31,10 +32,16 @@ class BooksTestCase(APITestCase):
         url = reverse("book-list")
         response = self.client.get(url)
 
+        books = (
+            Book.objects.all()
+            .annotate(
+                annotated_likes=Count(Case(When(userbookrelation__like=True, then=1)))
+            )
+            .order_by("id")
+        )
+
         # Getting data from serializer.
-        serializer_data = BooksSerializer(
-            [self.book_1, self.book_2, self.book_3], many=True
-        ).data
+        serializer_data = BooksSerializer(books, many=True).data
         self.assertEqual(status.HTTP_200_OK, response.status_code)
         self.assertEqual(serializer_data, response.data)
 
@@ -52,9 +59,17 @@ class BooksTestCase(APITestCase):
         # Request to server via router name from "url.py".
         url = reverse("book-list")
         response = self.client.get(url, data={"search": "Author 2"})
-
+        books = (
+            Book.objects.all()
+            .filter(id__in=[self.book_2.id, self.book_3.id])
+            .annotate(
+                annotated_likes=Count(Case(When(userbookrelation__like=True, then=1)))
+            )
+            .order_by("id")
+        )
         # Getting data from serializer.
-        serializer_data = BooksSerializer([self.book_2, self.book_3], many=True).data
+        serializer_data = BooksSerializer(books, many=True).data
+
         self.assertEqual(status.HTTP_200_OK, response.status_code)
         self.assertEqual(serializer_data, response.data)
 

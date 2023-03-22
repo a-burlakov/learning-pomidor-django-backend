@@ -1,3 +1,4 @@
+from django.db.models import Count, Case, When
 from django.test import TestCase
 from django.contrib.auth.models import User
 
@@ -21,7 +22,22 @@ class BooSerializerTestCase(TestCase):
         UserBookRelation.objects.create(user=user_2, book=book_1, like=True)
         UserBookRelation.objects.create(user=user_3, book=book_2, like=True)
 
-        data = BooksSerializer([book_1, book_2], many=True).data
+        books = (
+            Book.objects.all()
+            .annotate(
+                annotated_likes=Count(
+                    Case(
+                        When(
+                            userbookrelation__like=True,
+                            then=1,
+                        )
+                    )
+                )
+            )
+            .order_by("id")
+        )
+        data = BooksSerializer(books, many=True).data
+        print(data)
         expected_data = [
             {
                 "id": book_1.id,
@@ -29,6 +45,7 @@ class BooSerializerTestCase(TestCase):
                 "price": "25.00",
                 "author_name": "Test Author",
                 "likes_count": 2,
+                "annotated_likes": 2,
             },
             {
                 "id": book_2.id,
@@ -36,6 +53,7 @@ class BooSerializerTestCase(TestCase):
                 "price": "52.00",
                 "author_name": "Test Author",
                 "likes_count": 1,
+                "annotated_likes": 1,
             },
         ]
         self.assertEqual(expected_data, data)
