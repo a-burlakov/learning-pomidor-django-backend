@@ -8,6 +8,7 @@ from django.db.models import Count, Case, When
 class BooksSerializer(ModelSerializer):
     likes_count = serializers.SerializerMethodField()
     annotated_likes = serializers.IntegerField(read_only=True)
+    rating = serializers.DecimalField(max_digits=3, decimal_places=2, read_only=True)
 
     class Meta:
         model = Book
@@ -18,6 +19,7 @@ class BooksSerializer(ModelSerializer):
             "author_name",
             "likes_count",
             "annotated_likes",
+            "rating",
         )
 
     def get_likes_count(self, instance):
